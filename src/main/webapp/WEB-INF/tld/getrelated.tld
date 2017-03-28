@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="GBK" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+    "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+<taglib>
+	<tlibversion>1.0</tlibversion>
+	<jspversion>1.2</jspversion>
+	<shortname>sinovatech</shortname>
+	<info>
+		This tag library contains tag extensions for the Remend Web
+		Application
+	</info>
+	<tag>
+		<name>RLT</name>
+		<tagclass>com.sinovatech.unicom.service.taglib.RelatedTag</tagclass>
+		<bodycontent>JSP</bodycontent>
+		<attribute>
+			<name>businessid</name> <!-- 业务id -->
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+	</tag>
+</taglib>

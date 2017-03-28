@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weblogic-web-app xmlns="http://www.bea.com/ns/weblogic/90">
+    <context-root>jk_es</context-root>
+    <container-descriptor>
+        <servlet-reload-check-secs>-1</servlet-reload-check-secs>
+         <!--<prefer-web-inf-classes>true</prefer-web-inf-classes>-->
+        <prefer-application-packages>
+            <package-name>org.joda</package-name>
+        </prefer-application-packages>
+    </container-descriptor>
+    <jsp-descriptor>
+        <page-check-seconds>0</page-check-seconds>
+    </jsp-descriptor>
+    <session-descriptor>
+        <cookie-name>jk_es</cookie-name>
+    </session-descriptor>
+</weblogic-web-app>

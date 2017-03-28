@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration>
+	<property name="LOG_HOME" value="${catalina.home:-..}/logs"/>
+	<property name="CM_HOME" value="jk_es"/>
+
+	<appender name="A1" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- appender name="A1" class="ch.qos.logback.core.rolling.RollingFileAppender" -->
+		<File>
+			${LOG_HOME}/${CM_HOME}/info.log
+		</File>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_HOME}/${CM_HOME}/info.log.%d{yyyy-MM-dd}</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>
+				--[%d{yyyy-MM-dd HH:mm:ss}] %5p %c:%L - %m%n
+			</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+	<appender name="A2" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<!-- appender name="A2" class="ch.qos.logback.core.rolling.RollingFileAppender" -->
+		<File>
+			${LOG_HOME}/${CM_HOME}/error.log
+		</File>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_HOME}/${CM_HOME}/error.log.%d{yyyy-MM-dd}</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>--:[%d{yyyy-MM-dd HH:mm:ss}] %5p %c:%L - %m%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+	<appender name="springmvc" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>UTF-8</encoder>
+		<File>
+			${LOG_HOME}/${CM_HOME}/dataplatformlog/spring.log
+		</File>
+		<append>true</append>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${LOG_HOME}/${CM_HOME}/cache.log.%d{yyyy-MM-dd}</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>--:[%d{yyyy-MM-dd HH:mm:ss}] %5p %c:%L - %m%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+	</appender>
+
+	<!-- 控制台输出 -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>UTF-8</encoder>
+		<encoder>
+			<pattern>--:[%d{yyyy-MM-dd HH:mm:ss}] %5p %c:%L - %m%n</pattern>
+			<charset>UTF-8</charset>
+		</encoder>
+	</appender>
+
+	<logger name="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver"
+	        additivity="false" level="DEBUG">
+		<appender-ref ref="springmvc"/>
+	</logger>
+
+	<root>
+		<appender-ref ref="A1"/>
+		<appender-ref ref="A2"/>
+		<appender-ref ref="STDOUT"/>
+	</root>
+</configuration>

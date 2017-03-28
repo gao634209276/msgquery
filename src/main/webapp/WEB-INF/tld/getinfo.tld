@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="GBK" ?>
+<!DOCTYPE taglib
+        PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN"
+    "http://java.sun.com/j2ee/dtds/web-jsptaglibrary_1_1.dtd">
+
+<taglib>
+	<tlibversion>1.0</tlibversion>
+	<jspversion>1.2</jspversion>
+	<shortname>sinovatech</shortname>
+	<info>
+		This tag library contains tag extensions for the Remend Web
+		Application
+	</info>
+	<tag>
+		<name>INFO</name>
+		<tagclass>com.sinovatech.unicom.service.taglib.InfoTag</tagclass>
+		<bodycontent>JSP</bodycontent>
+		<attribute>
+			<name>provinceid</name> <!-- 省份id -->
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>businessid</name> <!-- 业务id -->
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<attribute>
+			<name>faqnum</name> <!-- 问题条数 -->
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+		</attribute>
+		<!-- 问题类别id -->
+		<!--attribute>
+			<name>faqtype</name> 
+			<required>false</required>
+			<rtexprvalue>false</rtexprvalue>
+		</attribute-->
+	</tag>
+</taglib>

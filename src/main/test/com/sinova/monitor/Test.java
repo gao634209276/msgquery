@@ -11,15 +11,16 @@ public class Test {
 	@org.junit.Test
 	public void testDate() throws ParseException {
 		String today = "2017.03.28";
-		String day = "2017.02.20";
+		String day = "2017.03.27";
 		//System.out.println(today.compareTo(day));
-		SimpleDateFormat sdf = new SimpleDateFormat("YYYY.MM.dd");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-		long i = System.currentTimeMillis();
-		Date date = new Date(0);
+		/*long i = System.currentTimeMillis();
+		Date date = new Date(60);*/
 
-		System.out.println(sdf.parse(today).getTime());
-		System.out.println(sdf.format(date));
-		System.out.println(date.getTime());
+		//System.out.println(sdf.parse(today).getTime() - sdf.parse(day).getTime());
+		System.out.println(df.format(new Date(3600000 * 24)));
+		//System.out.println(sdf.parse(day).getTime());
 	}
 }

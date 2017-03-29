@@ -1,9 +1,9 @@
 package com.sinova.monitor.controller;
 
-import com.sinova.monitor.service.ESConfig;
 import com.sinova.monitor.service.MessageQuery;
-import com.sinova.monitor.service.SpringContextUtil;
+import com.sinova.monitor.util.DateUtil;
 import com.sinova.monitor.util.ProUtil;
+import org.elasticsearch.action.search.SearchResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -24,6 +24,7 @@ import java.util.*;
 public class MessageQueryController {
 	private Logger log = LoggerFactory.getLogger(MessageQueryController.class);
 
+
 	@RequestMapping("/list.htm")
 	public String getMessageList(HttpServletRequest request) {
 		List<String> intersList = ProUtil.toList(ProUtil.getProperties("interList.properties"));
@@ -37,9 +38,10 @@ public class MessageQueryController {
 	String getMessage(String inter, String keywords, String channel, String startDay, String endDay, @RequestParam(defaultValue = "1") String pageNum, String huanjing) {
 		String pagesize = ProUtil.getProperties("common.properties")
 				.getProperty("message.pagesize");//56
+		new MessageQuery().query(inter, keywords, channel, DateUtil.parse(startDay), DateUtil.parse(endDay), pageNum, pagesize, huanjing);
+		// message Query
 
-		// message query
-		new MessageQuery().getMessage(inter, keywords, channel, startDay, endDay, pageNum, huanjing);
+
 		return null;
 	}
 

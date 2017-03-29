@@ -29,6 +29,6 @@ public class Constant {
 	public static final String MESSAGE_MARK = "message";
 	public static final String MESSAGE_TRANSID = "transid";
 
-	// 接口名称e.g.  cu.query.accountbalance
+	// 接口名称e.g.  cu.doQuery.accountbalance
 	public static final String INTER_REGEX = "cu(\\.\\w+){2}";
 }

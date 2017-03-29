@@ -45,7 +45,7 @@ public class ProUtil {
 	}
 
 	/**
-	 * 如：cu.query.currentfee||当月话费查询
+	 * 如：cu.doQuery.currentfee||当月话费查询
 	 */
 	public static List<String> toList(Properties properties) {
 		String interSeparator = "||";

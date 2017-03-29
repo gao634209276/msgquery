@@ -4,7 +4,7 @@ import org.springframework.util.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  */
@@ -27,11 +27,20 @@ public class DateUtil {
 
 	public static SimpleDateFormat defatulFormat = new SimpleDateFormat(DATETIME_FORMAT);
 	public static SimpleDateFormat UTC_Format = new SimpleDateFormat(DATETIME_UTC_FORMAT);
+	public static SimpleDateFormat msgFormat = new SimpleDateFormat("yyyy.MM.dd");
 
+	/**
+	 * 默认解析为yyyy-MM-dd HH:mm:ss的时间格式
+	 */
 	public static Date parse(String strDate) {
 		return parse(strDate, defatulFormat);
 	}
 
+	/**
+	 * 指定特定的格式解析日期
+	 *
+	 * @param strDate 格式错误或者为空，返回null
+	 */
 	public static Date parse(String strDate, SimpleDateFormat df) {
 		Date date = null;
 		try {
@@ -43,4 +52,15 @@ public class DateUtil {
 		}
 		return date;
 	}
+
+	public static Set<String> getDaySet(Date beginDate, Date endDate) {
+		Calendar begin = Calendar.getInstance();
+		Calendar end = Calendar.getInstance();
+		begin.setTime(beginDate);
+		end.setTime(endDate);
+
+
+		return null;
+	}
+
 }

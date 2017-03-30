@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Properties;
 
 /**
  * spring管理TransportClient对象
@@ -18,11 +17,12 @@ import java.util.Properties;
 @Configuration
 public class ESConfig {
 
-	@Value("#{common}")
-	private Properties common;
+	/*@Value("#{common}")
+	private Properties common;*/
 
 	@Value("#{common['es.cluster.nodes']}")
 	private String nodes;
+
 
 	@Bean(name = "client")
 	public TransportClient getClient() {

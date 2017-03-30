@@ -16,6 +16,7 @@ public class ESQuery {
 			requestBuilder.setFrom(pageNum - 1 / pagesize);
 		if (pagesize >= 0)
 			requestBuilder.setSize(pagesize);
+
 		return requestBuilder;
 	}
 

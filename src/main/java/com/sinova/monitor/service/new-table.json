@@ -1,0 +1,13 @@
+{
+  "@timestamp": "2017-03-30T00:33:48.000Z",
+  "message": "sinovaservice[2017-03-30 00:33:48] INFO com.sinovaservice.commons.common.log.MessageLog:22 - 18565007774--cu.query.wofamilyinfo--transid=111000001110220000052017033000334801217600",
+  "@version": "1",
+  "path": "/app/wangting3.0/logs/e3/service/cluster_node40/info.log",
+  "host": "localhost.localdomain",
+  "serverip": "10.20.11.47",
+  "type": "web",
+  "mobile": "18565007774",
+  "transid": "111000001110220000052017033000334801217600",
+  "inter": "cu.query.wofamilyinfo",
+  "indexPrefix": "webmessage"
+}

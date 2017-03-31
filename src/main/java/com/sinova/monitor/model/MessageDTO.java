@@ -1,12 +1,15 @@
 package com.sinova.monitor.model;
 
 /**
+ * DTO,对应前端的data-bind
  * <td data-bind="text:timestamp" class="errorTime">&nbsp;</td>
  * <td data-bind="text:type">&nbsp;</td>
  * <td data-bind="text:mobile">&nbsp;</td>
  * <td data-bind="text:intercode">&nbsp;</td>
  * <td data-bind="text:inter">&nbsp;</td>
  * <td data-bind="text:transid">&nbsp;</td>
+ * <p>
+ * Created by Noah on 2017/3/31.
  */
 public class MessageDTO implements Comparable<MessageDTO> {
 	private String timestamp = "";

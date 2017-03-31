@@ -26,6 +26,7 @@ import static com.sinova.monitor.util.ProUtil.getProperties;
  * 1，匹配索引
  * 2，查询
  * 3，处理结果
+ * Created by Noah on 2017/3/31.
  */
 @Service
 public class MessageQueryImpl implements MessageQuery {
@@ -33,17 +34,12 @@ public class MessageQueryImpl implements MessageQuery {
 	private static final Log log = LogFactory.getLog(MessageQueryImpl.class);
 
 	@Override
-	public String queryIndex(String inter, String keywords, String channel,
+	public String queryIndex(String[] indices, String inter, String keywords,
 	                         Date startDate, Date endDate,
-	                         int pageNum, int pagesize, String env) {
-		//1,index ${channel}-${env}-YYYY.MM.dd
-		String indexPrefix = getIndexPref(channel, env);
-		if (StringUtils.isEmpty(indexPrefix)) return "0001";
-		updateIndices();
-		String[] indices = getIndices(indexPrefix, startDate, endDate);
-		if (indices.length == 0) return "0002";
+	                         int pageNum, int pagesize) {
+
 		// 2,构建SearchRequest
-		SearchRequestBuilder request = buildRequest(indices, channel, pageNum, pagesize);
+		SearchRequestBuilder request = buildRequest(indices, pageNum, pagesize);
 		// 3,构建Query
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
 		if (!StringUtils.isEmpty(inter) && !inter.equals("all"))
@@ -111,36 +107,26 @@ public class MessageQueryImpl implements MessageQuery {
 		map.put("pageNo", pageNum);
 		map.put("tablesize", infoList.size());
 		map.put("error", 0);
-		String json = JSON.toJSONString(map);
-		log.info(json);
-		return json;
+		return JSON.toJSONString(map);
 	}
 
 	@Override
-	public List<Message> queryTid(String mobile, String transid, String channel,
-	                              Date startDate, Date endDate, String env) {
-		List<Message> msgList = new ArrayList<Message>();
-		//1,index ${channel}-${env}-YYYY.MM.dd
-		String indexPrefix = getIndexPref(channel, env);
-		if (StringUtils.isEmpty(indexPrefix))
-			return msgList;
-		String[] indices = getIndices(indexPrefix, startDate, endDate);
-		if (indices.length == 0)
-			return msgList;
-		// 3,构建Query
+	public String queryTid(String[] indices, String mobile, String transid,
+	                       Date startDate, Date endDate) {
+		// 1,构建Query
 		BoolQueryBuilder query = QueryBuilders.boolQuery()
 				.must(QueryBuilders.termQuery("transid", transid.toLowerCase()))
 				//.must(QueryBuilders.termQuery("mobile", mobile.toLowerCase()))
 				.must(timestampRange(startDate, endDate));
 		// 2,构建SearchRequest
-		SearchRequestBuilder request = buildRequest(indices, channel, 0, 100);
+		SearchRequestBuilder request = buildRequest(indices, 0, 100);
 		request.setQuery(query).addSort("@timestamp", SortOrder.DESC);//setRouting(mobile).
 		SearchResponse response = request.execute().actionGet();
 		log.info("查询时间为(ms):" + (response.getTookInMillis()));
 		SearchHit[] hits = response.getHits().getHits();
 
 		Pattern pattern = Pattern.compile("INFO\\s\\S+\\:[0-9]+");
-
+		List<Message> msgList = new ArrayList<Message>();
 		for (SearchHit hit : hits) {
 			Map<String, Object> hitMap = hit.getSource();
 			// 获取日志的行号
@@ -164,6 +150,25 @@ public class MessageQueryImpl implements MessageQuery {
 			msgList.add(message);
 		}
 		Collections.sort(msgList);
-		return msgList;
+		//页面显示处理
+		StringBuffer msgBuf = new StringBuffer();
+		for (Message msg : msgList) {
+			String message = msg.getMessage();
+			// line = message.split("\n"),
+			// line >50000 --> 用\n截取第一个
+			if (message.split("\n").length >= 500) {
+				Matcher m = Pattern.compile("\n").matcher(message);
+				int mIdx = 0;
+				while (m.find()) {
+					mIdx++;
+					if (mIdx == 500) break;//当"\n"符号第500次出现的位置
+				}
+				message = message.substring(0, m.start());
+			}
+			// \n----\n+line+\n---\n+line+...
+			msgBuf.append("\n--------------------------------------------------------------------------------------------------------------------------------------\n")
+					.append(message);
+		}
+		return msgBuf.toString();
 	}
 }

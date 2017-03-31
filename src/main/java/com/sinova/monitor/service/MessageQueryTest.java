@@ -1,33 +1,24 @@
 package com.sinova.monitor.service;
 
-import com.sinova.monitor.model.Message;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
-
-import static com.sinova.monitor.elasticsearch.ESClient.buildRequest;
-import static com.sinova.monitor.elasticsearch.ESClient.getIndexPref;
 
 /**
- * 预发布：yfb
- * 测试：test
+ * 测试
+ * Created by Noah on 2017/3/31.
  */
 @Service
-public class MessageQueryTest implements MessageQuery {
-
+public class MessageQueryTest implements MessageQuery{
 	@Override
-	public String queryIndex(String inter, String keywords, String channel,
-	                         Date startDate, Date endDate,
-	                         int pageNum, int pagesize, String env) {
-		//SearchRequestBuilder request = buildRequest("test", channel, pageNum, pagesize);
+	public String queryIndex(String[] indices, String inter, String keywords,
+	                         Date startDate, Date endDate, int pageNum, int pagesize) {
 		return null;
 	}
 
 	@Override
-	public List<Message> queryTid(String mobile, String transid, String channel,
-	                              Date startDate, Date endDate, String env) {
+	public String queryTid(String[] indices, String mobile, String transid,
+	                       Date startDate, Date endDate) {
 		return null;
 	}
 }

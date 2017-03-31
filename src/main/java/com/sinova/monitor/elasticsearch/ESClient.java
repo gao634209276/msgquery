@@ -1,13 +1,11 @@
 package com.sinova.monitor.elasticsearch;
 
 import com.sinova.monitor.util.SpringContextUtil;
-import com.sun.istack.internal.Nullable;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.springframework.util.StringUtils;
 
 import java.util.*;
 
@@ -15,20 +13,35 @@ import static com.sinova.monitor.util.DateUtil.UTC_Format;
 import static com.sinova.monitor.util.DateUtil.msgFormat;
 
 
+/**
+ * 持用ElasticSearch TransportClient对象,提供通用处理方法
+ * Created by Noah on 2017/3/31.
+ */
 public class ESClient {
 	public static Client client = SpringContextUtil.getBean("client");
 
 	private static List<String> indices;
 
-	public static SearchRequestBuilder buildRequest(String[] indices, String types, int pageNum, int pagesize) {
+	/**
+	 * 通用方法,构建一个查询请求对象
+	 */
+	public static SearchRequestBuilder buildRequest(String[] indices, int pageNum, int pagesize) {
 		SearchRequestBuilder requestBuilder = client.prepareSearch(indices).setExplain(true);
 		int from = pageNum - 1 / pagesize;
-		if (!StringUtils.isEmpty(types))
-			requestBuilder.setTypes(types);
 		if (from > 0)
 			requestBuilder.setFrom(pageNum - 1 / pagesize);
 		if (pagesize >= 0)
 			requestBuilder.setSize(pagesize);
+		if (!indices[0].contains("-")) {
+			return requestBuilder;
+		}
+		// 如果是生产集群,生产的indices是有channel和date构成,所以type可以从indices中获取
+		Set<String> typeSet = new HashSet<String>();
+		for (String index : indices) {
+			String type = index.substring(0, index.indexOf("-"));
+			typeSet.add(type);
+		}
+		requestBuilder.setTypes(typeSet.toArray(new String[typeSet.size()]));
 		return requestBuilder;
 	}
 
@@ -43,6 +56,8 @@ public class ESClient {
 
 
 	/**
+	 * 仅用于生产,因为测试的index固定
+	 *
 	 * @param indexPrefix Elasticsearch的前缀，一般为: $env-$channel
 	 * @param startDate   可为空，确保为yyyy-MM-dd HH:mm:ss的时间格式，否则解析错误
 	 * @param endDate     可为空，确保为yyyy-MM-dd HH:mm:ss的时间格式，否则解析错误
@@ -92,14 +107,5 @@ public class ESClient {
 		indices = Arrays.asList(allIndices);
 	}
 
-	public static String getIndexPref(String channel, String env) {
-		StringBuilder prefixBuf = new StringBuilder();
-		if ("product".equals(env)) {
-			prefixBuf.append(channel).append("message");
-		} else {
-			// test-mob test-web, pre-mob,pre-web
-			prefixBuf.append(env).append("-").append(channel);
-		}
-		return prefixBuf.toString();
-	}
+
 }

@@ -231,7 +231,7 @@
             url: "${pageContext.request.contextPath}/msgquery/messageDetail.htm",
             data: {
                 "transid": obj.transid,
-                "type": obj.type,
+                "channel": obj.type,
                 "mobile":obj.mobile,
                 'startDay': $("#startTime").val(),
                 'endDay': $("#endTime").val(),

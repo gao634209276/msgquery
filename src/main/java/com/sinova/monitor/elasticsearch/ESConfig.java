@@ -12,7 +12,6 @@ import java.net.UnknownHostException;
 
 /**
  * spring管理TransportClient对象
- * 启动容器之加载1次
  */
 @Configuration
 public class ESConfig {

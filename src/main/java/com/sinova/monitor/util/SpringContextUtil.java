@@ -1,4 +1,4 @@
-package com.sinova.monitor.service;
+package com.sinova.monitor.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -15,10 +15,6 @@ public class SpringContextUtil implements ApplicationContextAware {
 
 	private static ApplicationContext applicationContext; // Spring应用上下文环境
 
-	/**
-	 * 实现了ApplicationContextAware 接口，必须实现该方法；
-	 * 通过传递applicationContext参数初始化成员变量applicationContext
-	 */
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		SpringContextUtil.applicationContext = applicationContext;

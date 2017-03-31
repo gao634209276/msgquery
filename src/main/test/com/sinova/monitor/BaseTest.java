@@ -1,6 +1,6 @@
 package com.sinova.monitor;
 
-import com.sinova.monitor.service.SpringContextUtil;
+import com.sinova.monitor.util.SpringContextUtil;
 import org.elasticsearch.client.Client;
 import org.junit.Test;
 import org.junit.runner.RunWith;

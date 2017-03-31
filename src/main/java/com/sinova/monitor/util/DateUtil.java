@@ -53,10 +53,4 @@ public class DateUtil {
 		}
 		return date;
 	}
-
-	public static Date add(Date date, int d) {
-		return null;
-	}
-
-
 }

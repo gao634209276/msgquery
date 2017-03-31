@@ -1,7 +1,7 @@
 package com.sinova.monitor.controller;
 
 import com.sinova.monitor.model.Message;
-import com.sinova.monitor.service.MessageQuery;
+import com.sinova.monitor.service.MessageQueryImpl;
 import com.sinova.monitor.util.DateUtil;
 import com.sinova.monitor.util.ProUtil;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class MessageQueryController {
 	private Logger log = LoggerFactory.getLogger(MessageQueryController.class);
 
 	@Resource
-	private MessageQuery messageQuery;
+	private MessageQueryImpl messageQuery;
 	@Value("#{common['message.pagesize']}")
 	private String pagesize;
 
@@ -47,6 +47,8 @@ public class MessageQueryController {
 	                  String startDay, String endDay,
 	                  @RequestParam(defaultValue = "1") String pageNum,
 	                  String huanjing) {
+		// 用于计算时间
+		long beginTime = System.currentTimeMillis();
 		Date endDate = DateUtil.parse(endDay);
 		if (null == endDate) {
 			endDate = new Date();
@@ -57,6 +59,8 @@ public class MessageQueryController {
 				Integer.parseInt(pagesize), huanjing);
 		/*if(StringUtils.isEmpty(json)){
 		}*/
+		long useTime = (System.currentTimeMillis() - beginTime) / 1000;
+		log.info("请求用时为" + useTime + "秒");
 		return json;
 	}
 
@@ -80,6 +84,7 @@ public class MessageQueryController {
 	@RequestMapping("/messageDetail.htm")
 	public String messageDetail(HttpServletRequest request, String mobile, String transid, String type,
 	                            String startDay, String endDay, String huanjing) {
+		long beginTime = System.currentTimeMillis();
 		Date endDate = DateUtil.parse(endDay);
 		if (null == endDate) {
 			endDate = new Date();
@@ -113,6 +118,8 @@ public class MessageQueryController {
 		String msgDetail = br.replace(" ", "&nbsp");
 		request.setAttribute("downloadDetail", dloadDetail);
 		request.setAttribute("messageDetail", msgDetail);
+		long useTime = (System.currentTimeMillis() - beginTime) / 1000;
+		log.info("请求用时为" + useTime + "秒");
 		return "msgquery/detail";
 	}
 }

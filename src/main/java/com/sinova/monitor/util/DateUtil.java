@@ -28,6 +28,7 @@ public class DateUtil {
 	public static SimpleDateFormat defatulFormat = new SimpleDateFormat(DATETIME_FORMAT);
 	public static SimpleDateFormat UTC_Format = new SimpleDateFormat(DATETIME_UTC_FORMAT);
 	public static SimpleDateFormat msgFormat = new SimpleDateFormat("yyyy.MM.dd");
+	public static SimpleDateFormat dayFormat = new SimpleDateFormat(DATE_FORMAT);
 
 	/**
 	 * 默认解析为yyyy-MM-dd HH:mm:ss的时间格式
@@ -53,14 +54,9 @@ public class DateUtil {
 		return date;
 	}
 
-	public static Set<String> getDaySet(Date beginDate, Date endDate) {
-		Calendar begin = Calendar.getInstance();
-		Calendar end = Calendar.getInstance();
-		begin.setTime(beginDate);
-		end.setTime(endDate);
-
-
+	public static Date add(Date date, int d) {
 		return null;
 	}
+
 
 }

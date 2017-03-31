@@ -8,7 +8,7 @@ package com.sinova.monitor.model;
  * <td data-bind="text:inter">&nbsp;</td>
  * <td data-bind="text:transid">&nbsp;</td>
  */
-public class MessageBaseInfo implements Comparable<MessageBaseInfo> {
+public class MessageDTO implements Comparable<MessageDTO> {
 	private String timestamp = "";
 	private String type = "";
 	private String mobile = "";
@@ -75,7 +75,7 @@ public class MessageBaseInfo implements Comparable<MessageBaseInfo> {
 
 	@Override
 	public String toString() {
-		return "MessageBaseInfo{" +
+		return "MessageDTO{" +
 				"timestamp='" + timestamp + '\'' +
 				", type='" + type + '\'' +
 				", mobile='" + mobile + '\'' +
@@ -86,7 +86,7 @@ public class MessageBaseInfo implements Comparable<MessageBaseInfo> {
 	}
 
 	@Override
-	public int compareTo(MessageBaseInfo o) {
+	public int compareTo(MessageDTO o) {
 		return -this.getTimestamp().compareTo(o.getTimestamp());
 	}
 }

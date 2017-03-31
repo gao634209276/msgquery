@@ -2,25 +2,24 @@ package com.sinova.monitor.service;
 
 
 import com.alibaba.fastjson.JSON;
-import com.sinova.monitor.model.MessageBaseInfo;
+import com.sinova.monitor.model.Message;
+import com.sinova.monitor.model.MessageDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.sinova.monitor.service.ESQuery.*;
-import static com.sinova.monitor.util.DateUtil.*;
 import static com.sinova.monitor.util.ProUtil.getProperties;
 
 /**
@@ -32,16 +31,17 @@ import static com.sinova.monitor.util.ProUtil.getProperties;
 @Service
 public class MessageQuery {
 
-
 	private static final Log log = LogFactory.getLog(MessageQuery.class);
 
 	public String queryIndex(String inter, String keywords, String channel, Date startDate, Date endDate, int pageNum, int pagesize, String env) {
+		// 用于计算时间
+		long beginTime = System.currentTimeMillis();
 		//1,index ${channel}-${env}-YYYY.MM.dd
 		String indexPrefix = getIndexPref(channel, env);
-		if (StringUtils.isEmpty(indexPrefix))
+		if (StringUtils.isEmpty(indexPrefix)) {
 			return "";
-		Date start = new Date();
-		String[] indices = getIndices(indexPrefix, startDate, endDate, start);
+		}
+		String[] indices = getIndices(indexPrefix, startDate, endDate, null);
 		if (indices.length == 0)
 			return "";
 		// 2,构建SearchRequest
@@ -58,13 +58,7 @@ public class MessageQuery {
 			query.must(QueryBuilders.termQuery("transid", keywords.toLowerCase()));
 		}
 		// @timestamp-->range doQuery
-		//RangeQueryBuilder timestampRange = rangeQuery("@timestamp",startDate, endDate);
-		if (null != startDate || null != endDate) {
-			RangeQueryBuilder timestampRange = QueryBuilders.rangeQuery("@timestamp");
-			if (null != startDate) timestampRange.from(UTC_Format.format(startDate));
-			if (null != endDate) timestampRange.to(UTC_Format.format(endDate));
-			query.must(timestampRange);
-		}
+		query.must(timestampRange(startDate, endDate));
 		//request设置query构建完成
 		String[] includes = new String[]{"@timestamp", "mobile", "transid", "inter", "type"};
 		request.setQuery(query)
@@ -78,34 +72,34 @@ public class MessageQuery {
 		int total = (int) response.getHits().totalHits();
 		SearchHit[] hits = response.getHits().getHits();
 		Properties interList = getProperties("interList.properties");
-		List<MessageBaseInfo> infoList = new LinkedList<MessageBaseInfo>();
+		List<MessageDTO> infoList = new LinkedList<MessageDTO>();
 		Set<String> tidCheck = new HashSet<>();
-		int j = 0;
-		for (int i = 0; i < hits.length; i++) {
+		int j = 1;
+		for (SearchHit hit : hits) {
 			// check
-			Map<String, Object> hit = hits[i].getSource();
-			String jsonHit = hits[i].getSourceAsString();
+			Map<String, Object> hitMap = hit.getSource();
+			String jsonHit = hit.getSourceAsString();
 			log.info(jsonHit);
-			String tid = String.valueOf(hit.get("transid"));
+			String tid = String.valueOf(hitMap.get("transid"));
 			if (tidCheck.contains(tid)) {
 				continue;
 			}
 			// set should not null
-			MessageBaseInfo info = new MessageBaseInfo();
-			if (null != hit.get("inter")) {
-				String interStr = String.valueOf(hit.get("inter"));
+			MessageDTO info = new MessageDTO();
+			if (null != hitMap.get("inter")) {
+				String interStr = String.valueOf(hitMap.get("inter"));
 				info.setInter(interStr);
 				if ((interList.containsKey(interStr))) {
 					info.setIntercode(interList.getProperty(interStr));
 				}
 			}
-			String tempstamp = String.valueOf(hit.get("@timestamp")).replace("T", " ");
+			String tempstamp = String.valueOf(hitMap.get("@timestamp")).replace("T", " ");
 			String date = tempstamp.substring(0, tempstamp.indexOf("."));
 			// set
 			info.setTransid(tid);
 			//info.setFlag(j);
-			info.setType(String.valueOf(hit.get("type")));
-			info.setMobile(String.valueOf(hit.get("mobile")));
+			info.setType(String.valueOf(hitMap.get("type")));
+			info.setMobile(String.valueOf(hitMap.get("mobile")));
 			info.setTimestamp(date.substring(date.indexOf("-") + 1));
 			// add
 			infoList.add(info);
@@ -121,64 +115,61 @@ public class MessageQuery {
 		map.put("tablesize", infoList.size());
 		map.put("error", 0);
 		String json = JSON.toJSONString(map);
-		long useTime = (new Date().getTime() - start.getTime()) / 1000;
+		long useTime = (System.currentTimeMillis() - beginTime) / 1000;
 		log.info("请求用时为" + useTime + "秒");
 		log.info(json);
 		return json;
 	}
 
-	public String queryTid(String mobile, String transid, String channel, Date startDate, Date endDate, String env) {
+	public List<Message> queryTid(String mobile, String transid, String channel, Date startDate, Date endDate, String env) {
+		List<Message> msgList = new ArrayList<Message>();
 		//1,index ${channel}-${env}-YYYY.MM.dd
 		String indexPrefix = getIndexPref(channel, env);
 		if (StringUtils.isEmpty(indexPrefix))
-			return "";
+			return msgList;
 		Date start = new Date();
 		String[] indices = getIndices(indexPrefix, startDate, endDate, start);
 		if (indices.length == 0)
-			return "";
-
-
+			return msgList;
 		// 3,构建Query
-		BoolQueryBuilder query = QueryBuilders.boolQuery();
-		// mobile, transid
-		query.must(QueryBuilders.termQuery("transid", transid.toLowerCase()))
-				.must(QueryBuilders.termQuery("mobile", mobile.toLowerCase()));
-		if (null != startDate || null != endDate) {
-			RangeQueryBuilder timestampRange = QueryBuilders.rangeQuery("@timestamp");
-			if (null != startDate) timestampRange.from(UTC_Format.format(startDate));
-			if (null != endDate) timestampRange.to(UTC_Format.format(endDate));
-			query.must(timestampRange);
-		}
+		BoolQueryBuilder query = QueryBuilders.boolQuery()
+				.must(QueryBuilders.termQuery("transid", transid.toLowerCase()))
+				//.must(QueryBuilders.termQuery("mobile", mobile.toLowerCase()))
+				.must(timestampRange(startDate, endDate));
 		// 2,构建SearchRequest
 		SearchRequestBuilder request = buildRequest(indices, channel, 0, 100);
-		request.setRouting(mobile).setQuery(query).addSort("@timpstamps", SortOrder.DESC);
+		request.setQuery(query).addSort("@timestamp", SortOrder.DESC);//setRouting(mobile).
 		SearchResponse response = request.execute().actionGet();
 		log.info("查询时间为(ms):" + (response.getTookInMillis()));
 		SearchHit[] hits = response.getHits().getHits();
-		List<String> listjson = new ArrayList<String>();
-		for (SearchHit h : hits) {
-			// message.compile("INFO\\s\\S+\\:[0-9]+");
-			// 获取日志的行号，xxxx[yyyy-DD-mm HH:mm:ss] INFO xx.xxx.xx:dd -mobile-xxxx
-			// -->dd-->code
-			// 去掉@符号，@timestamp-->timestamp
-			// to JSON
+
+		Pattern pattern = Pattern.compile("INFO\\s\\S+\\:[0-9]+");
+
+		for (SearchHit hit : hits) {
+			Map<String, Object> hitMap = hit.getSource();
+			// 获取日志的行号
+			Matcher m = pattern.matcher((String) hitMap.get("message"));
+			int codeNum = 0;
+			if (m.find()) {
+				String logInfo = m.group(0);
+				int codeSplit = logInfo.indexOf(":");
+				if (codeSplit > 0) {
+					codeNum = Integer.parseInt(logInfo.substring(codeSplit + 1));
+				}
+			}
 			// 报文加上服务器，节点; message = ip+path+message
+			String msgstr = "服务器：" + hitMap.get("serverip") + "      "
+					+ "节点：" + hitMap.get("path") + "\n"
+					+ hitMap.get("message");
 			// 组装对象，对象按时间排序
-			// line = message.split("\n"),
-			// line >50000 --> 用\n截取第一个
-			// \n----\n+line+\n---\n+line+...
-			// 左右括号处理< ==> "&lt;  > ==> "&gt;
-			// 换行处理 \n --> <br/>
-			// 空格 &nbsp
-			// request.set(messageDetail,message)
-			//
-			listjson.add(h.getSourceAsString());
+			Message message = new Message();
+			message.setCode(codeNum);
+			message.setMessage(msgstr);
+			msgList.add(message);
 		}
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("reponse_code", "ok");
-		resultMap.put("result", listjson);
-		resultMap.put("total", response.getHits().totalHits());
-		return null;
+		Collections.sort(msgList);
+
+		return msgList;
 	}
 
 	public String getIndexPref(String channel, String env) {
@@ -193,41 +184,4 @@ public class MessageQuery {
 	}
 
 
-	/**
-	 * @param indexPrefix Elasticsearch的前缀，一般为: $env-$channel
-	 * @param startDate   可为空，确保为yyyy-MM-dd HH:mm:ss的时间格式，否则解析错误
-	 * @param endDate     可为空，确保为yyyy-MM-dd HH:mm:ss的时间格式，否则解析错误
-	 * @return 通过es查询所有indices与用户指定时间区间，返回可用的indices
-	 */
-	public String[] getIndices(String indexPrefix, Date startDate, Date endDate, Date now) {
-		// 初始化构建一个可查询的index的集合，目前固定保持20天内的数据，这里限制最多可查询20天
-		Calendar begin = Calendar.getInstance();
-		begin.setTime(now);
-		begin.add(Calendar.DATE, -20);
-		Calendar end = Calendar.getInstance();
-		end.setTime(now);
-		if (null != startDate)
-			begin.setTime(startDate);
-		if (null != endDate)
-			end.setTime(endDate);
-		Set<String> daySet = new HashSet<>();
-		while (begin.compareTo(end) <= 0) {
-			// prefix-yyyy.MM.dd
-			daySet.add(indexPrefix + "-" + msgFormat.format(begin.getTime()));
-			begin.add(Calendar.DATE, 1);
-		}
-		// get All ES indices from Elasticsearch
-		Client client = SpringContextUtil.getBean("client");
-		ClusterStateResponse csr = client.admin().cluster().prepareState()
-				.execute().actionGet();
-		String[] allIndices = csr.getState().getMetaData()
-				.concreteAllOpenIndices();
-		// get indices match channel and env
-		List<String> indices = new ArrayList<>();
-		for (int i = 0; i < allIndices.length; i++) {
-			if (allIndices[i].startsWith(indexPrefix) && daySet.contains(allIndices[i]))
-				indices.add(allIndices[i]);
-		}
-		return indices.toArray(new String[indices.size()]);
-	}
 }

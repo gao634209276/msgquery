@@ -1,8 +1,0 @@
-{
-  "@timestamp": "2016-07-08T17:47:25.570Z",
-  "message": "--客户端mobile_domain_1_node11:webservice:[2016-06-30 15:35:47]  INFO com.sinovatech.ecsservice.framework.log.MessageLog:50 - 13074132002--cu.query.fourgcredit--transid=113000004111120002392016063015354701656615",
-  "@version": "1",
-  "path": "/disk/var/webservice2.log",
-  "host": "bj-ecs-xhm-4f3-I-r3-5-r810-3-null-14",
-  "type": "message"
-}

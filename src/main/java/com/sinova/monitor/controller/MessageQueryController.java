@@ -1,5 +1,6 @@
 package com.sinova.monitor.controller;
 
+import com.sinova.monitor.model.Message;
 import com.sinova.monitor.service.MessageQuery;
 import com.sinova.monitor.util.DateUtil;
 import com.sinova.monitor.util.ProUtil;
@@ -7,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,9 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * 报文查询大类
+ *
  */
 @Controller
 @RequestMapping("/msgquery")
@@ -45,14 +47,12 @@ public class MessageQueryController {
 	                  String startDay, String endDay,
 	                  @RequestParam(defaultValue = "1") String pageNum,
 	                  String huanjing) {
-
-		/*int pagesize = Integer.parseInt(
-				ProUtil.getProperties("common.properties")
-						.getProperty("message.pagesize"));//56*/
-		// message Query
+		Date endDate = DateUtil.parse(endDay);
+		if (null == endDate) {
+			endDate = new Date();
+		}
 		String json = messageQuery.queryIndex(inter, keywords, channel,
-				DateUtil.parse(startDay),
-				DateUtil.parse(endDay),
+				DateUtil.parse(startDay), endDate,
 				Integer.parseInt(pageNum),
 				Integer.parseInt(pagesize), huanjing);
 		/*if(StringUtils.isEmpty(json)){
@@ -78,17 +78,41 @@ public class MessageQueryController {
 	 * 详情页面展示
 	 */
 	@RequestMapping("/messageDetail.htm")
-	public String messageDetail(HttpServletRequest request, String mobile, String transid, String type, String startDay, String endDay, String huanjing) {
-		//transid
-		if (!StringUtils.isEmpty(transid)) {
-			//根据报文id再去查询记录
-			return "";
+	public String messageDetail(HttpServletRequest request, String mobile, String transid, String type,
+	                            String startDay, String endDay, String huanjing) {
+		Date endDate = DateUtil.parse(endDay);
+		if (null == endDate) {
+			endDate = new Date();
 		}
-		//String mobile, String transid, String type, Date startDay, Date endDay, String env
-		messageQuery.queryTid(mobile, transid, type,
-				DateUtil.parse(startDay),
-				DateUtil.parse(endDay),
-				huanjing);
-		return null;
+		List<Message> msgList = messageQuery.queryTid(mobile, transid, type,
+				DateUtil.parse(startDay), endDate, huanjing);
+		//页面显示处理
+		StringBuffer msgBuf = new StringBuffer();
+		for (Message msg : msgList) {
+			String message = msg.getMessage();
+			// line = message.split("\n"),
+			// line >50000 --> 用\n截取第一个
+			if (message.split("\n").length >= 500) {
+				Matcher m = Pattern.compile("\n").matcher(message);
+				int mIdx = 0;
+				while (m.find()) {
+					mIdx++;
+					if (mIdx == 500) break;//当"\n"符号第500次出现的位置
+				}
+				message = message.substring(0, m.start());
+			}
+			// \n----\n+line+\n---\n+line+...
+			msgBuf.append("\n--------------------------------------------------------------------------------------------------------------------------------------\n")
+					.append(message);
+		}
+		// 左右括号处理< ==> "&lt;  > ==> "&gt;
+		String dloadDetail = msgBuf.toString().replace("<", "&lt;").replace(">", "&gt;");
+		// 换行处理 \n --> <br/>
+		String br = dloadDetail.replace("\n", "<br/>");
+		// 空格 &nbsp
+		String msgDetail = br.replace(" ", "&nbsp");
+		request.setAttribute("downloadDetail", dloadDetail);
+		request.setAttribute("messageDetail", msgDetail);
+		return "msgquery/detail";
 	}
 }

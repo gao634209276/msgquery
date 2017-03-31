@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  */
@@ -43,11 +45,32 @@ public class Test {
 
 	@org.junit.Test
 	public void testString() {
-		String test = "2016-07-08 17:47:25.570Z";
-		test = test.substring(test.indexOf("-") + 1);
-		test = test.substring(0, test.indexOf("."));
+		String test = "a\nb\n\rc\r\nd";
+		System.out.println(test.split("\\n").length);
+		System.out.println("a\nb".indexOf("\n"));
 
-		System.out.println(test);
 
 	}
+
+	@org.junit.Test
+	public void testMatch() {
+		String s = "a\nb\nc\nd\ne\nf\ng";
+		Pattern p = Pattern.compile("\\n");
+		Matcher m = p.matcher(s);
+		//boolean b = m.matches();
+		//boolean b = m.find(100);
+		if (m.matches()) {
+			System.out.println(m.end());
+			if (m.end() == 0) {
+				System.out.println("yes");
+			}
+			System.out.println(m.start());
+		}
+	/*	while (m.find()) {
+			System.out.println(m.end());
+			System.out.println(m.start());
+		}*/
+	}
+
+
 }

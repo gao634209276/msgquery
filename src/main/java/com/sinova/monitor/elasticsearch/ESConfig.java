@@ -3,6 +3,7 @@ package com.sinova.monitor.elasticsearch;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,12 +17,8 @@ import java.net.UnknownHostException;
 @Configuration
 public class ESConfig {
 
-	/*@Value("#{common}")
-	private Properties common;*/
-
 	@Value("#{common['es.cluster.nodes']}")
 	private String nodes;
-
 
 	@Bean(name = "client")
 	public TransportClient getClient() {
@@ -30,9 +27,8 @@ public class ESConfig {
 				//.put("cluster.name",util.getProperty("es.cluster.name"))
 				.put("client.transport.ignore_cluster_name", true)
 				.build();
-		TransportClient client = null;
 		String[] ips = nodes.split(",");
-		InetSocketTransportAddress[] addressArray = new InetSocketTransportAddress[ips.length];
+		TransportAddress[] addressArray = new InetSocketTransportAddress[ips.length];
 		for (int i = 0; i < ips.length; i++) {
 			try {
 				addressArray[i] = new InetSocketTransportAddress(InetAddress.getByName(ips[i]), 9300);
@@ -40,9 +36,8 @@ public class ESConfig {
 				e.printStackTrace();
 			}
 		}
-		client = TransportClient.builder()
+		return TransportClient.builder()
 				.settings(settings).build()
 				.addTransportAddresses(addressArray);
-		return client;
 	}
 }

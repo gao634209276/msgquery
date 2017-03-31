@@ -66,17 +66,15 @@ public class MessageQueryController {
 		if ("product".equals(huanjing)) {
 			String indexPrefix = channel + "message";
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
-			if (indices.length == 0) return "0002";
-			msgQueryImpl.queryIndex(indices, inter, keywords, startDate, endDate,
+			if (indices.length == 0)
+				return "0002";
+			json = msgQueryImpl.queryIndex(indices, inter, keywords, startDate, endDate,
 					Integer.parseInt(pageNum), Integer.parseInt(pagesize));
 		} else {
-			msgQueryTest.queryIndex(new String[]{huanjing},
+			json = msgQueryTest.queryIndex(new String[]{huanjing},
 					inter, keywords, startDate, endDate,
 					Integer.parseInt(pageNum), Integer.parseInt(pagesize));
-			json = "";
 		}
-		/*if(StringUtils.isEmpty(json)){
-		}*/
 		long useTime = (System.currentTimeMillis() - beginTime) / 1000;
 		log.info("请求用时为" + useTime + "秒");
 		return json;
@@ -113,9 +111,9 @@ public class MessageQueryController {
 			String indexPrefix = channel + "message";
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
 			if (indices.length == 0) return "0002";
-			msgQueryImpl.queryTid(indices, mobile, transid, startDate, endDate);
+			msg = msgQueryImpl.queryTid(indices, mobile, transid, startDate, endDate);
 		} else {
-			msgQueryTest.queryTid(new String[]{huanjing}, mobile, transid, startDate, endDate);
+			msg = msgQueryTest.queryTid(new String[]{huanjing}, mobile, transid, startDate, endDate);
 		}
 		// 左右括号处理< ==> "&lt;  > ==> "&gt;
 		String dloadDetail = msg.replace("<", "&lt;").replace(">", "&gt;");

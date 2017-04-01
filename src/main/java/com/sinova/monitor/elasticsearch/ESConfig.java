@@ -12,7 +12,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * spring管理TransportClient对象
+ * spring配置类
+ * spring管理TransportClient对象，初始化后保持单例
  */
 @Configuration
 public class ESConfig {

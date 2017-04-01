@@ -68,14 +68,14 @@ public class MessageQueryController {
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
 			if (indices.length == 0)
 				return "0002";
-			json = msgQueryImpl.queryIndex(indices, inter, keywords, startDate, endDate,
+			json = msgQueryImpl.queryMessage(indices, inter, keywords, startDate, endDate,
 					Integer.parseInt(pageNum), Integer.parseInt(pagesize));
 		} else if ("pre".equals(huanjing)) {
-			json = msgQueryTest.queryIndex(new String[]{"yfb-web-2017.04.01"},
+			json = msgQueryTest.queryMessage(new String[]{"yfb-web-2017.04.01"},
 					inter, keywords, startDate, endDate,
 					Integer.parseInt(pageNum), Integer.parseInt(pagesize));
 		} else {
-			json = msgQueryTest.queryIndex(new String[]{huanjing},
+			json = msgQueryTest.queryMessage(new String[]{huanjing},
 					inter, keywords, startDate, endDate,
 					Integer.parseInt(pageNum), Integer.parseInt(pagesize));
 		}
@@ -91,7 +91,7 @@ public class MessageQueryController {
 	public
 	@ResponseBody
 	String getTxt(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
-//        request.setCharacterEncoding("UTF-8");
+		// request.setCharacterEncoding("UTF-8");
 		String detail = request.getParameter("detail");
 		String fileName = "message" + new Date().getTime() + ".txt";
 		response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
@@ -110,16 +110,16 @@ public class MessageQueryController {
 			endDate = new Date();
 		}
 		Date startDate = DateUtil.parse(startDay);
-		String msg = "";
+		String msg ;
 		if ("product".equals(huanjing)) {
 			String indexPrefix = channel + "message";
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
 			if (indices.length == 0) return "0002";
-			msg = msgQueryImpl.queryTid(indices, mobile, transid, startDate, endDate);
+			msg = msgQueryImpl.queryDetail(indices, mobile, transid, startDate, endDate);
 		} else if ("pre".equals(huanjing)) {
-			msg = msgQueryTest.queryTid(new String[]{"yfb-web-2017.04.01"}, mobile, transid, startDate, endDate);
+			msg = msgQueryTest.queryDetail(new String[]{"yfb-web-2017.04.01"}, mobile, transid, startDate, endDate);
 		} else {
-			msg = msgQueryTest.queryTid(new String[]{huanjing}, mobile, transid, startDate, endDate);
+			msg = msgQueryTest.queryDetail(new String[]{huanjing}, mobile, transid, startDate, endDate);
 		}
 		// 左右括号处理< ==> "&lt;  > ==> "&gt;
 		String dloadDetail = msg.replace("<", "&lt;").replace(">", "&gt;");

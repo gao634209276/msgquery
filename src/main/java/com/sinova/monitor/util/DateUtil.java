@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
+ * 日期解析转换的工具类
  */
 public class DateUtil {
 	// 日期格式yyyy-MM-dd字符串常量

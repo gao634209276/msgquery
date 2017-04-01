@@ -21,6 +21,11 @@ public class MessageDeal {
 	public static Pattern msgPattern = Pattern.compile("INFO\\s\\S+\\:[0-9]+");
 
 
+	/**
+	 *
+	 * @param hits Elasticsearch查询结果的SearchHit
+	 * @return 经过遍历转化和匹配，返回数据保证在页面能正常显示
+	 */
 	public static String hits2Detail(SearchHit[] hits) {
 		List<Message> msgList = new ArrayList<Message>();
 		for (SearchHit hit : hits) {

@@ -4,6 +4,7 @@ import com.sinova.monitor.util.ProUtil;
 
 /**
  * 查询常量配置
+ * Elasticsearch集群中index的常用field
  * Created by noah on 2017/4/1.
  */
 public class SearchEnv {

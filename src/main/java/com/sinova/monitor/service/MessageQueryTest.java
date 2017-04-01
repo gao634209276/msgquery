@@ -35,8 +35,8 @@ public class MessageQueryTest implements MessageQuery {
 	private static int flag = Pattern.CASE_INSENSITIVE;
 
 	@Override
-	public String queryIndex(String[] indices, String interTuple, String keywords,
-	                         Date startDate, Date endDate, int pageNum, int pagesize) {
+	public String queryMessage(String[] indices, String interTuple, String keywords,
+	                           Date startDate, Date endDate, int pageNum, int pagesize) {
 		String inter = null;
 		String interCode = null;
 
@@ -134,8 +134,8 @@ public class MessageQueryTest implements MessageQuery {
 	}
 
 	@Override
-	public String queryTid(String[] indices, String mobile, String transid,
-	                       Date startDate, Date endDate) {
+	public String queryDetail(String[] indices, String mobile, String transid,
+	                          Date startDate, Date endDate) {
 		//transid确定不为空，在message的field中查询transid
 		BoolQueryBuilder query = QueryBuilders.boolQuery()
 				.must(QueryBuilders.termQuery(MESSAGE, transid.toLowerCase()));

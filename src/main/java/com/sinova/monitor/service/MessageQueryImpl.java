@@ -34,9 +34,9 @@ public class MessageQueryImpl implements MessageQuery {
 	private static final String[] includes = new String[]{TIMESTAMP, MOBILE, TRANSID, INTER, TYPE};
 
 	@Override
-	public String queryIndex(String[] indices, String interTuple, String keywords,
-	                         Date startDate, Date endDate,
-	                         int pageNum, int pagesize) {
+	public String queryMessage(String[] indices, String interTuple, String keywords,
+	                           Date startDate, Date endDate,
+	                           int pageNum, int pagesize) {
 		String inter = null;
 		String interCode = null;
 		// 1,构建Query
@@ -116,8 +116,8 @@ public class MessageQueryImpl implements MessageQuery {
 	}
 
 	@Override
-	public String queryTid(String[] indices, String mobile, String transid,
-	                       Date startDate, Date endDate) {
+	public String queryDetail(String[] indices, String mobile, String transid,
+	                          Date startDate, Date endDate) {
 		//todo mobile rout以及查询，目前有问题
 		// 1,构建Query
 		BoolQueryBuilder query = QueryBuilders.boolQuery()

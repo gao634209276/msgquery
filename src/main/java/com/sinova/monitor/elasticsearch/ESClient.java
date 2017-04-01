@@ -15,13 +15,13 @@ import static com.sinova.monitor.util.DateUtil.msgFormat;
 
 
 /**
- * 持用ElasticSearch TransportClient对象,提供通用处理方法
+ * 持有ElasticSearch TransportClient对象,提供通用处理方法
  * Created by Noah on 2017/3/31.
  */
 public class ESClient {
 	public static Client client = SpringContextUtil.getBean("client");
 
-	private static List<String> allOpenindices;
+	private static List<String> allOpenIndices;
 
 	/**
 	 * 通用方法,构建一个查询请求对象
@@ -82,13 +82,13 @@ public class ESClient {
 			daySet.add(indexPrefix + "-" + msgFormat.format(begin.getTime()));
 			begin.add(Calendar.DATE, 1);
 		}
-		// get All ES allOpenindices from Elasticsearch
-		if (null == allOpenindices) {
+		// get All ES allOpenIndices from Elasticsearch
+		if (null == allOpenIndices) {
 			updateIndices();
 		}
-		// get allOpenindices match channel and env
+		// get allOpenIndices match channel and env
 		List<String> matchindices = new ArrayList<>();
-		for (String index : allOpenindices) {
+		for (String index : allOpenIndices) {
 			if (index.startsWith(indexPrefix) && daySet.contains(index))
 				matchindices.add(index);
 		}
@@ -96,7 +96,7 @@ public class ESClient {
 	}
 
 	/**
-	 * All ES allOpenindices from Elasticsearch
+	 * All ES allOpenIndices from Elasticsearch
 	 * date --> 用于更新updateTime，格式化为：yyyy.MM.dd
 	 */
 	public static void updateIndices() {
@@ -104,6 +104,6 @@ public class ESClient {
 				.execute().actionGet();
 		String[] allOpenIndices = csr.getState().getMetaData()
 				.concreteAllOpenIndices();
-		allOpenindices = Arrays.asList(allOpenIndices);
+		ESClient.allOpenIndices = Arrays.asList(allOpenIndices);
 	}
 }

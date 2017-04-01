@@ -7,6 +7,11 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Properties工具类，
+ * 并封装保存配置文件common.properties对应的Properties
+ * 可以通过封装后的get获取配置
+ */
 public class ProUtil {
 
 	private static Properties common;
@@ -29,8 +34,13 @@ public class ProUtil {
 	}
 
 
-	public static Properties load(String properties) {
-		Resource defaultRes = new ClassPathResource(properties);
+
+	/**
+	 * @param proFile properties文件的path
+	 * @return 返回properties文件对应的Properties对象
+	 */
+	public static Properties load(String proFile) {
+		Resource defaultRes = new ClassPathResource(proFile);
 		Properties props = null;
 		try {
 			props = PropertiesLoaderUtils.loadProperties(defaultRes);
@@ -38,6 +48,21 @@ public class ProUtil {
 			e.printStackTrace();
 		}
 		return props;
+	}
+	/**
+	 * @param proFile properties文件的path
+	 * @return 返回properties文件对应的Map对象
+	 */
+	public static Map<String, String> Map(String proFile) {
+		Properties props = load(proFile);
+		Map<String, String> map = new HashMap<>();
+		String key;
+		assert props != null;
+		for (Object o : props.keySet()) {
+			key = (String) o;
+			map.put(key, props.getProperty(key));
+		}
+		return map;
 	}
 
 	/**
@@ -55,20 +80,11 @@ public class ProUtil {
 	}
 
 	/**
+	 * 类型转换Properties to Map
 	 *
+	 * @param properties 待转换的Properties
+	 * @return 返回一个Map类型
 	 */
-	public static Map<String, String> getMap(String properties) {
-		Properties props = load(properties);
-		Map<String, String> map = new HashMap<>();
-		String key;
-		assert props != null;
-		for (Object o : props.keySet()) {
-			key = (String) o;
-			map.put(key, props.getProperty(key));
-		}
-		return map;
-	}
-
 	public Map<String, String> toMap(Properties properties) {
 		Map<String, String> map = new HashMap<>();
 		String key;

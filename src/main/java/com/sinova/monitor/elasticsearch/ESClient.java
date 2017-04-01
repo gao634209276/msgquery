@@ -9,6 +9,7 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 
 import java.util.*;
 
+import static com.sinova.monitor.elasticsearch.SearchEnv.TIMESTAMP;
 import static com.sinova.monitor.util.DateUtil.UTC_Format;
 import static com.sinova.monitor.util.DateUtil.msgFormat;
 
@@ -20,7 +21,7 @@ import static com.sinova.monitor.util.DateUtil.msgFormat;
 public class ESClient {
 	public static Client client = SpringContextUtil.getBean("client");
 
-	private static List<String> indices;
+	private static List<String> allOpenindices;
 
 	/**
 	 * 通用方法,构建一个查询请求对象
@@ -32,13 +33,13 @@ public class ESClient {
 			requestBuilder.setFrom(pageNum - 1 / pagesize);
 		if (pagesize >= 0)
 			requestBuilder.setSize(pagesize);
-		if (!indices[0].contains("-")) {
+		if (!indices[0].contains("message")) {
 			return requestBuilder;
 		}
 		// 如果是生产集群,生产的indices是有channel和date构成,所以type可以从indices中获取
 		Set<String> typeSet = new HashSet<String>();
 		for (String index : indices) {
-			String type = index.substring(0, index.indexOf("-"));
+			String type = index.substring(0, index.indexOf("message"));
 			typeSet.add(type);
 		}
 		requestBuilder.setTypes(typeSet.toArray(new String[typeSet.size()]));
@@ -48,7 +49,7 @@ public class ESClient {
 	public static RangeQueryBuilder timestampRange(Date startDate, Date endDate) {
 		if (endDate == null) endDate = new Date();
 		RangeQueryBuilder timestampRange = QueryBuilders
-				.rangeQuery("@timestamp")
+				.rangeQuery(TIMESTAMP)
 				.to(UTC_Format.format(endDate));
 		if (null != startDate) timestampRange.from(UTC_Format.format(startDate));
 		return timestampRange;
@@ -81,31 +82,28 @@ public class ESClient {
 			daySet.add(indexPrefix + "-" + msgFormat.format(begin.getTime()));
 			begin.add(Calendar.DATE, 1);
 		}
-		// get All ES indices from Elasticsearch
-		if (null == indices) {
+		// get All ES allOpenindices from Elasticsearch
+		if (null == allOpenindices) {
 			updateIndices();
 		}
-		// get indices match channel and env
+		// get allOpenindices match channel and env
 		List<String> matchindices = new ArrayList<>();
-		for (String index : indices) {
+		for (String index : allOpenindices) {
 			if (index.startsWith(indexPrefix) && daySet.contains(index))
 				matchindices.add(index);
 		}
 		return matchindices.toArray(new String[matchindices.size()]);
 	}
 
-
 	/**
-	 * All ES indices from Elasticsearch
+	 * All ES allOpenindices from Elasticsearch
 	 * date --> 用于更新updateTime，格式化为：yyyy.MM.dd
 	 */
 	public static void updateIndices() {
 		ClusterStateResponse csr = client.admin().cluster().prepareState()
 				.execute().actionGet();
-		String[] allIndices = csr.getState().getMetaData()
+		String[] allOpenIndices = csr.getState().getMetaData()
 				.concreteAllOpenIndices();
-		indices = Arrays.asList(allIndices);
+		allOpenindices = Arrays.asList(allOpenIndices);
 	}
-
-
 }

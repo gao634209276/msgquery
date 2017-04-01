@@ -36,7 +36,7 @@
    <!--</filter>-->
    <!--<filter-mapping>-->
        <!--<filter-name>integrateFilter</filter-name>-->
-       <!--<url-pattern>/*</url-pattern>-->
+       <!--<url-msgPattern>/*</url-msgPattern>-->
    <!--</filter-mapping>-->
 	<!-- bms end -->
 	<filter-mapping>  
@@ -65,7 +65,7 @@
 	</servlet-mapping>
 	<!--<servlet-mapping>-->
 		<!--<servlet-name>spring3mvc</servlet-name>-->
-		<!--<url-pattern>*.css</url-pattern>-->
+		<!--<url-msgPattern>*.css</url-msgPattern>-->
 	<!--</servlet-mapping>-->
 	<!--统一后台-->
 </web-app>

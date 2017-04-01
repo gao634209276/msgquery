@@ -7,11 +7,29 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import java.io.IOException;
 import java.util.*;
 
-/**
- */
 public class ProUtil {
 
-	public static Properties getProperties(String properties) {
+	private static Properties common;
+
+	static {
+		Resource defaultRes = new ClassPathResource("common.properties");
+		try {
+			common = PropertiesLoaderUtils.loadProperties(defaultRes);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String get(String key) {
+		return common.getProperty(key);
+	}
+
+	public static String get(String key, String defaultValue) {
+		return common.getProperty(key, defaultValue);
+	}
+
+
+	public static Properties load(String properties) {
 		Resource defaultRes = new ClassPathResource(properties);
 		Properties props = null;
 		try {
@@ -22,8 +40,25 @@ public class ProUtil {
 		return props;
 	}
 
+	/**
+	 * 如：cu.doQuery.currentfee||当月话费查询
+	 */
+	public static List<String> toList(Properties properties) {
+		String interSeparator = "||";
+		List<String> list = new ArrayList<>();
+		String key;
+		for (Object o : properties.keySet()) {
+			key = (String) o;
+			list.add(key + interSeparator + properties.get(key));
+		}
+		return list;
+	}
+
+	/**
+	 *
+	 */
 	public static Map<String, String> getMap(String properties) {
-		Properties props = getProperties(properties);
+		Properties props = load(properties);
 		Map<String, String> map = new HashMap<>();
 		String key;
 		assert props != null;
@@ -42,20 +77,6 @@ public class ProUtil {
 			map.put(key, properties.getProperty(key));
 		}
 		return map;
-	}
-
-	/**
-	 * 如：cu.doQuery.currentfee||当月话费查询
-	 */
-	public static List<String> toList(Properties properties) {
-		String interSeparator = "||";
-		List<String> list = new ArrayList<>();
-		String key;
-		for (Object o : properties.keySet()) {
-			key = (String) o;
-			list.add(key + interSeparator + properties.get(key));
-		}
-		return list;
 	}
 }
 

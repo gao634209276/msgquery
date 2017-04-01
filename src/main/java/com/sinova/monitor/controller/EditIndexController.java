@@ -27,28 +27,17 @@ import static com.sinova.monitor.util.DateUtil.*;
 public class EditIndexController {
 	private Logger log = LoggerFactory.getLogger(EditIndexController.class);
 
-
-	@Autowired
-	@Qualifier(value = "messageQueryImpl")
-	private MessageQuery msgQueryImpl;
-	@Autowired
-	@Qualifier(value = "messageQueryTest")
-	private MessageQuery msgQueryTest;
-
 	@RequestMapping("/closeIndex.json")
 	public
 	@ResponseBody
 	String closeIndex(String thisDate, String channels, String huanjing) {
-
 		HashMap<String, String> map = new HashMap<String, String>();
-
 		Date date;
 		try {
 			date = dayFormat.parse(thisDate);
 		} catch (ParseException e) {
 			e.printStackTrace();
-			map.put("code", "0004");// 日期格式错误
-			return JSON.toJSONString(map);
+			return null;// 异常
 		}
 		// week ago
 		Calendar c = new GregorianCalendar();
@@ -59,24 +48,23 @@ public class EditIndexController {
 			return JSON.toJSONString(map);
 		}
 		if (!"product".equals(huanjing)) {
-			map.put("code", "0005");//测试集群,有且仅有一个index
+			map.put("code", "0003");//测试集群,有且仅有一个index
 			return JSON.toJSONString(map);
 		}
 		String indexPrefix = channels + "message";
 		String[] indices = getIndices(indexPrefix, date, date);
 		if (indices.length == 0)
-			map.put("code", "0001");//无索引
+			map.put("code", "000");//该索引不存在或已关闭
 		CloseIndexResponse response = client.admin()
 				.indices().prepareClose(indices).get();
 		if (response.isAcknowledged()) {
-			map.put("code", "0001");
+			map.put("code", "0001");//操作成功
 			return JSON.toJSONString(map);
 		} else {
 			map.put("code", "0002");
 			return JSON.toJSONString(map);
 		}
 	}
-
 
 	@RequestMapping("/openorclose.htm")
 	public String openOrClose() {
@@ -97,9 +85,9 @@ public class EditIndexController {
 					.prepareOpen(channels + "message-" + thisDate.replace("-", ".")).get();
 			if (response.isAcknowledged()) {
 				map.put("code", "0001");
-				return JSON.toJSONString(map);
+				return JSON.toJSONString(map);//操作成功
 			} else {
-				map.put("code", "0003");
+				map.put("code", "0002");//操作失败
 				return JSON.toJSONString(map);
 			}
 		} catch (Exception e) {

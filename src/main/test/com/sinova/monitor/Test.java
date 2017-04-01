@@ -1,7 +1,10 @@
 package com.sinova.monitor;
 
+import org.springframework.util.StringUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -22,7 +25,7 @@ public class Test {
 		/*long i = System.currentTimeMillis();
 		Date date = new Date(60);*/
 
-		//System.out.println(sdf.parse(today).getTime() - sdf.parse(day).getTime());
+		//System.out.println(sdf.hits2Detail(today).getTime() - sdf.hits2Detail(day).getTime());
 		System.out.println(df.format(new Date(3600000 * 24)));
 		//System.out.println(sdf.parse(day).getTime());
 	}
@@ -45,10 +48,14 @@ public class Test {
 
 	@org.junit.Test
 	public void testString() {
-		String test = "a\nb\n\rc\r\nd";
-		System.out.println(test.split("\\n").length);
-		System.out.println("a\nb".indexOf("\n"));
-
+		String test = "a||b";
+		System.out.println(test.indexOf("||"));
+		System.out.println(Arrays.asList(test.split("\\|\\|")));
+		String xml;
+		if (!StringUtils.isEmpty(xml = test)) {
+			System.out.println("test");
+			System.out.println(xml);
+		}
 
 	}
 

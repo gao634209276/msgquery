@@ -2,6 +2,8 @@ package com.sinova.monitor.elasticsearch;
 
 import com.sinova.monitor.util.SpringContextUtil;
 import org.elasticsearch.action.admin.cluster.state.ClusterStateResponse;
+import org.elasticsearch.action.admin.indices.close.CloseIndexResponse;
+import org.elasticsearch.action.admin.indices.open.OpenIndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -11,17 +13,20 @@ import java.util.*;
 
 import static com.sinova.monitor.elasticsearch.SearchEnv.TIMESTAMP;
 import static com.sinova.monitor.util.DateUtil.UTC_Format;
+import static com.sinova.monitor.util.DateUtil.dayFormat;
 import static com.sinova.monitor.util.DateUtil.msgFormat;
 
 
 /**
  * 持有ElasticSearch TransportClient对象,提供通用处理方法
+ * 注意：该类为有状态类，allOpenIndices会根据天和用户操作索引而改变
  * Created by Noah on 2017/3/31.
  */
 public class ESClient {
 	public static Client client = SpringContextUtil.getBean("client");
 
 	private static List<String> allOpenIndices;
+	private static String updateTime;// yyyy-MM-dd
 
 	/**
 	 * 通用方法,构建一个查询请求对象
@@ -46,6 +51,12 @@ public class ESClient {
 		return requestBuilder;
 	}
 
+	/**
+	 * 构建一个timestamp的RangeQuery，生产和测试通用
+	 *
+	 * @param startDate 如果为空不设置
+	 * @param endDate   默认为当前时间
+	 */
 	public static RangeQueryBuilder timestampRange(Date startDate, Date endDate) {
 		if (endDate == null) endDate = new Date();
 		RangeQueryBuilder timestampRange = QueryBuilders
@@ -83,7 +94,7 @@ public class ESClient {
 			begin.add(Calendar.DATE, 1);
 		}
 		// get All ES allOpenIndices from Elasticsearch
-		if (null == allOpenIndices) {
+		if (!updateTime.equals(dayFormat.format(now)) && null == allOpenIndices) {
 			updateIndices();
 		}
 		// get allOpenIndices match channel and env
@@ -99,11 +110,29 @@ public class ESClient {
 	 * All ES allOpenIndices from Elasticsearch
 	 * date --> 用于更新updateTime，格式化为：yyyy.MM.dd
 	 */
-	public static void updateIndices() {
-		ClusterStateResponse csr = client.admin().cluster().prepareState()
-				.execute().actionGet();
-		String[] allOpenIndices = csr.getState().getMetaData()
-				.concreteAllOpenIndices();
-		ESClient.allOpenIndices = Arrays.asList(allOpenIndices);
+	public static synchronized void updateIndices() {
+		String now = dayFormat.format(new Date());
+		if (null == ESClient.allOpenIndices && !ESClient.updateTime.equals(now)) {
+			ClusterStateResponse csr = client.admin().cluster().prepareState()
+					.execute().actionGet();
+			String[] allOpenIndices = csr.getState().getMetaData()
+					.concreteAllOpenIndices();
+			ESClient.allOpenIndices = Arrays.asList(allOpenIndices);
+			ESClient.updateTime = now;
+		}
+	}
+
+	public static synchronized OpenIndexResponse openIndex(String index) throws Exception {
+		ESClient.allOpenIndices = null;
+		ESClient.updateTime = dayFormat.format(new Date());
+		return client.admin().indices()
+				.prepareOpen(index).get();
+	}
+
+	public static synchronized CloseIndexResponse closeIndices(String[] indices) throws Exception {
+		ESClient.allOpenIndices = null;
+		ESClient.updateTime = dayFormat.format(new Date());
+		return client.admin().indices()
+				.prepareClose(indices).get();
 	}
 }

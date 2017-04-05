@@ -1,8 +1,10 @@
 package com.sinova.monitor.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.sinova.monitor.elasticsearch.ESClient;
 import org.elasticsearch.action.admin.indices.close.CloseIndexResponse;
 import org.elasticsearch.action.admin.indices.open.OpenIndexResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -56,14 +58,20 @@ public class EditIndexController {
 		String[] indices = getIndices(indexPrefix, date, date);
 		if (indices.length == 0)
 			map.put("code", "000");//该索引不存在或已关闭
-		CloseIndexResponse response = client.admin()
-				.indices().prepareClose(indices).get();
-		if (response.isAcknowledged()) {
-			map.put("code", "0001");//操作成功
-			return JSON.toJSONString(map);
-		} else {
-			map.put("code", "0002");
-			return JSON.toJSONString(map);
+		try {
+		/*CloseIndexResponse response = client.admin()
+				.indices().prepareClose(indices).get();*/
+			AcknowledgedResponse response = ESClient.closeIndices(indices);
+			if (response.isAcknowledged()) {
+				map.put("code", "0001");//操作成功
+				return JSON.toJSONString(map);
+			} else {
+				map.put("code", "0002");
+				return JSON.toJSONString(map);
+			}
+		} catch (Exception e) {
+			log.info(e.toString());// 关闭失败
+			return null;
 		}
 	}
 
@@ -82,8 +90,9 @@ public class EditIndexController {
 			return JSON.toJSONString(map);
 		}
 		try {
-			OpenIndexResponse response = client.admin().indices()
-					.prepareOpen(channels + "message-" + thisDate.replace("-", ".")).get();
+			/*OpenIndexResponse response = client.admin().indices()
+					.prepareOpen(channels + "message-" + thisDate.replace("-", ".")).get();*/
+			AcknowledgedResponse response = ESClient.openIndex(channels + "message-" + thisDate.replace("-", "."));
 			if (response.isAcknowledged()) {
 				map.put("code", "0001");
 				return JSON.toJSONString(map);//操作成功
@@ -96,5 +105,4 @@ public class EditIndexController {
 			return null;
 		}
 	}
-
 }

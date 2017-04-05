@@ -42,7 +42,9 @@ public class MessageQueryTest implements MessageQuery {
 
 		SearchRequestBuilder request = buildRequest(indices, pageNum, pagesize);
 		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		// keywords关键字构建termQuery
 		query.must(QueryBuilders.termQuery(MESSAGE, keywords.toLowerCase()));
+		// inter处理：按.切分，在message字段构建termQuery
 		if (!StringUtils.isEmpty(interTuple) && !interTuple.equals("all")) {
 			int separatorIndex = interTuple.indexOf("||");
 			inter = interTuple.substring(0, separatorIndex);
@@ -55,6 +57,7 @@ public class MessageQueryTest implements MessageQuery {
 		}
 		request.setQuery(query).addSort(TIMESTAMP, SortOrder.DESC);
 		SearchResponse response = request.execute().actionGet();
+		// 结果处理：对message正则匹配获取transid
 		int total = (int) response.getHits().totalHits();
 		SearchHit[] hits = response.getHits().getHits();
 		List<MessageDTO> infoList = new LinkedList<MessageDTO>();

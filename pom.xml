@@ -36,10 +36,6 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<spring.version>4.2.3.RELEASE</spring.version>
 		<jackson.version>1.9.13</jackson.version>
-		<storm.version>0.10.0</storm.version>
-		<kafka.version>0.8.2.1</kafka.version>
-		<curator.version>2.5.0</curator.version>
-		<mybatis.version>3.3.0</mybatis.version>
 	</properties>
 	<profiles>
 		<profile>
@@ -125,7 +121,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.7</version>
+			<version>1.2.30</version>
 			<!--<version>1.2.28</version>-->
 		</dependency>
 

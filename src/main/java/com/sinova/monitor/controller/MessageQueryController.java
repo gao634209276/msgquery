@@ -1,6 +1,8 @@
 package com.sinova.monitor.controller;
 
 import com.sinova.monitor.service.MessageQuery;
+import com.sinova.monitor.service.MessageQueryImpl;
+import com.sinova.monitor.service.MessageQueryTest;
 import com.sinova.monitor.util.DateUtil;
 import com.sinova.monitor.util.ProUtil;
 import org.slf4j.Logger;
@@ -29,13 +31,19 @@ import static com.sinova.monitor.elasticsearch.ESClient.updateIndices;
 @RequestMapping("/msgquery")
 public class MessageQueryController {
 	private Logger log = LoggerFactory.getLogger(MessageQueryController.class);
-
-	@Autowired
-	@Qualifier(value = "messageQueryImpl")
 	private MessageQuery msgQueryImpl;
-	@Autowired
-	@Qualifier(value = "messageQueryTest")
 	private MessageQuery msgQueryTest;
+	@Autowired
+	//@Qualifier(value = "messageQueryImpl")
+	public void messageQueryImpl() {
+		msgQueryImpl = new MessageQueryImpl();
+	}
+	@Autowired
+	//@Qualifier(value = "messageQueryTest")
+	//private MessageQuery msgQueryTest;
+	public void messageQueryTest() {
+		msgQueryTest = new MessageQueryTest();
+	}
 
 	@Value("#{common['message.pagesize']}")
 	private String pagesize;
@@ -63,6 +71,7 @@ public class MessageQueryController {
 		Date startDate = DateUtil.parse(startDay);
 		updateIndices();
 		String json;
+
 		if ("product".equals(huanjing)) {
 			String indexPrefix = channel + "message";
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
@@ -110,7 +119,7 @@ public class MessageQueryController {
 			endDate = new Date();
 		}
 		Date startDate = DateUtil.parse(startDay);
-		String msg ;
+		String msg;
 		if ("product".equals(huanjing)) {
 			String indexPrefix = channel + "message";
 			String[] indices = getIndices(indexPrefix, startDate, endDate);
